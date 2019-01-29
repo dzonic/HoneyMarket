@@ -1,0 +1,7 @@
+﻿@model ProdajaMeda.Models.ViewModels.Korpa.KorpaVM
+
+<div class="ajaxcart" style="color:black;">
+    Vaša korpa: @Model.Quantity artikl(i) @Model.Price &nbsp;RSD
+    <br />
+    @Html.ActionLink("Checkout", "Index")
+</div>

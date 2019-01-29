@@ -1,0 +1,19 @@
+﻿@model IEnumerable<ProdajaMeda.Models.ViewModels.Pages.PageVM>
+
+@{
+    string tempPageTitle = (string)TempData["PageTitle"];
+}
+
+@foreach (var item in Model)
+{
+    if (tempPageTitle == item.Title)
+    {
+        <li class="active"><a href="/@item.Slug">@item.Title</a></li>
+    }
+    else
+    {
+        <li><a href="/@item.Slug">@item.Title</a></li>
+    }
+}
+
+

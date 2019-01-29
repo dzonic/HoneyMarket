@@ -1,0 +1,10 @@
+﻿@model IEnumerable<ProdajaMeda.Models.ViewModels.Prodavnica.KategorijaVM>
+
+<h3>Kategorije</h3>
+
+<ul>
+    @foreach (var item in Model)
+    {
+        <li><a href="/Prodavnica/Category/@item.Slug.ToLower()">@item.Name</a></li>
+    }
+</ul>

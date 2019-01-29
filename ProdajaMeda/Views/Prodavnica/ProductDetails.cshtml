@@ -1,0 +1,98 @@
+﻿@model ProdajaMeda.Models.ViewModels.Prodavnica.ProductVM
+
+@{
+    ViewBag.Title = Model.Name;
+}
+
+<h2>@Model.Name</h2>
+<br />
+
+<div class="row">
+    <div class="col-xs-12 col-md-4">
+        <img src="/Images/Uploads/Products/@Model.Id/Thumbs/@Model.ImageName" />
+    </div>
+
+    <div class="col-xs-12 col-md-8">
+        @Html.DisplayFor(model => model.Description)
+        <br />
+        @Html.DisplayFor(model => model.Price) &nbsp;RSD
+        <br />
+
+        @if (Request.IsAuthenticated)
+    {
+        <div class="addtocart">
+            <a href="#" class="addtocart">Dodaj u korpu</a>
+            <span class="loader">
+                <img src="~/Content/img/ajax-loader.gif" />
+            </span>
+            <span class="ajaxmsg">Proizvod ce biti dodat u korpu.</span>
+        </div>
+}
+    </div>
+</div>
+
+<hr />
+
+<div class="row">
+
+    <h3>Fotografije proizvoda</h3>
+
+    <div class="col-xs-12 fancyboxdiv">
+        <br /><br />
+        @foreach (var image in Model.Galerija)
+        {
+            <div style="display: inline-block">
+                <a class="fancybox" rel="gallery1" href="/Images/Uploads/Products/@Model.Id/Gallery/@image">
+                    <img src="/Images/Uploads/Products/@Model.Id/Gallery/Thumbs/@image" />
+                </a>
+            </div>
+        }
+    </div>
+
+</div>
+
+<link href="~/Content/jquery.fancybox.css" rel="stylesheet" />
+
+@section Scripts {
+
+    <script src="~/Scripts/jquery.fancybox.js"></script>
+    <script>
+$(function () {
+
+    /*
+    * Fancybox
+    */
+
+    $(".fancybox").fancybox();
+
+    ////////////////////////////////////////////////////////
+
+    /*
+    * Add to cart
+    */
+
+    $("a.addtocart").click(function (e) {
+        e.preventDefault();
+
+        $("span.loader").addClass("ib");
+
+        var url = "/korpa/AddToCartPartial";
+
+        $.get(url, { id: @Model.Id }, function (data) {
+            $(".ajaxcart").html(data);
+        }).done(function () {
+            $("span.loader").removeClass("ib");
+            $("span.ajaxmsg").addClass("ib");
+            setTimeout(function () {
+                $("span.ajaxmsg").fadeOut("fast");
+                $("span.ajaxmsg").removeClass("ib");
+            }, 1000);
+        });
+    });
+
+    ////////////////////////////////////////////////////////
+
+});
+    </script>
+
+}

@@ -1,0 +1,49 @@
+﻿@model IEnumerable<ProdajaMeda.Models.ViewModels.Prodavnica.ProductVM>
+
+@{
+    ViewBag.Title = ViewBag.CategoryName;
+}
+
+<h2>@ViewBag.CategoryName</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            Naziv
+        </th>
+        <th>
+            Opis
+        </th>
+        <th>
+            Cena
+        </th>
+        <th>
+            Fotografija
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)&nbsp;RSD
+            </td>
+            <td>
+                <a href="/Prodavnica/product-details/@item.Slug">
+                    <img src="/Images/Uploads/Products/@item.Id/Thumbs/@item.ImageName" />
+                </a>
+            </td>
+            <td>
+                <a href="/Prodavnica/product-details/@item.Slug">Detalji</a>
+            </td>
+        </tr>
+    }
+
+</table>

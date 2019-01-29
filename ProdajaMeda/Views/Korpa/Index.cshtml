@@ -1,0 +1,230 @@
+﻿@model IEnumerable<ProdajaMeda.Models.ViewModels.Korpa.KorpaVM>
+
+@{
+    /**/
+
+    ViewBag.Title = "Korpa Detalji";
+    int count = 1;
+}
+
+<h2>Stanje u korpi</h2>
+
+@if (ViewBag.Message != null)
+{
+    <h3>@ViewBag.Message</h3>
+}
+else
+{
+    <table class="table">
+        <tr>
+            <th>
+                Naziv
+            </th>
+            <th>
+                Količina
+            </th>
+            <th>
+                Cena
+            </th>
+            <th>
+                Fotografija
+            </th>
+            <th>
+
+            </th>
+            <th>
+                Ukupno
+            </th>
+        </tr>
+
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductName)
+                </td>
+                <td class="qty@(item.ProductId)">
+                    @Html.DisplayFor(modelItem => item.Quantity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)&nbsp;RSD
+                </td>
+                <td>
+                    <img src="/Images/Uploads/Products/@item.ProductId/Thumbs/@item.Image" />
+                </td>
+                <td>
+                    <a href="#" class="incrproduct" data-id="@item.ProductId"> + </a>
+                    <a href="#" class="decrproduct" data-id="@item.ProductId"> - </a>
+                    <a href="#" class="removeproduct" data-id="@item.ProductId"> Ukloni </a>
+                </td>
+                <td class="total@(item.ProductId)">
+                    @Html.DisplayFor(modelItem => item.Total)&nbsp;RSD
+                </td>
+            </tr>
+        }
+
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="grandtotal"><b>Ukupno za plaćanje: </b><span>@ViewBag.GrandTotal</span> RSD </td>
+
+        </tr>
+    </table>
+
+    <div class="paypaldiv">
+        <form class="paypalform" action="https://www.sandbox.paypal.com/cgi-bin/webscr" method="post">
+            <input type="hidden" name="cmd" value="_cart">
+            <input type="hidden" name="upload" value="1">
+            <input type="hidden" name="business" value="jultranet-facilitator@gmail.com">
+
+            @foreach (var item in Model)
+            {
+                <input type="hidden" name="item_name_@count" value="@item.ProductName">
+                <input type="hidden" name="amount_@count" value="@item.Price">
+                <input type="hidden" name="quantity_@count" value="@item.Quantity">
+                count++;
+            }
+
+            <input type="hidden" name="currency_code" value="USD">
+            <input type="image" src="http://www.paypal.com/en_US/i/btn/x-click-but01.gif" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
+        </form>
+    </div>
+
+
+    <br />
+    <a href="#" class="placeorder btn btn-primary pull-right">Chcekout</a>
+
+}
+
+@section Scripts {
+    <script>
+
+        $(function () {
+
+            /*
+            * Incrementacija proizvoda
+            */
+
+            $("a.incrproduct").click(function (e) {
+                e.preventDefault();
+
+                var productId = $(this).data("id");
+                var url = "/korpa/IncrementProduct";
+
+                $.getJSON(url, { productId: productId }, function (data) {
+
+                    $("td.qty" + productId).html(data.qty);
+
+                    var price = data.qty * data.price;
+                    var priceHtml =  price.toFixed(2) + "RSD";
+
+                    $("td.total" + productId).html(priceHtml);
+
+                    var gt = parseFloat($("td.grandtotal span").text());
+                    var grandtotal = (gt + data.price).toFixed(2);
+
+                    $("td.grandtotal span").text(grandtotal);
+                }).done(function (data) {
+                    var url2 = "/korpa/PaypalPartial";
+
+                    $.get(url2, {}, function (data) {
+                        $('div.paypaldiv').html(data);
+                    });
+                });
+            });
+
+            //////////////////////////////////////////////////////////////
+
+            /*
+            * Decrementacija proizvoda
+            */
+
+            $("a.decrproduct").click(function (e) {
+                e.preventDefault();
+
+                var $this = $(this);
+                var productId = $(this).data("id");
+                var url = "/korpa/DecrementProduct";
+
+                $.getJSON(url, { productId: productId }, function (data) {
+                    if (data.qty == 0) {
+                        $this.parent().parent().fadeOut("fast", function () {
+                            location.reload();
+                        });
+                    }
+                    else {
+                        $("td.qty" + productId).html(data.qty);
+
+                        var price = data.qty * data.price;
+                        var priceHtml =   price.toFixed(2) + "RSD";
+
+                        $("td.total" + productId).html(priceHtml);
+
+                        var gt = parseFloat($("td.grandtotal span").text());
+                        var grandtotal = (gt - data.price).toFixed(2);
+
+                        $("td.grandtotal span").text(grandtotal);
+                    }
+
+                }).done(function (data) {
+                    var url2 = "/korpa/PaypalPartial";
+
+                    $.get(url2, {}, function (data) {
+                        $('div.paypaldiv').html(data);
+                    });
+                });
+            });
+
+            //////////////////////////////////////////////////////////////
+
+            /*
+            * Ukloni proizvod
+            */
+
+            $("a.removeproduct").click(function (e) {
+                e.preventDefault();
+
+                var $this = $(this);
+                var productId = $(this).data("id");
+                var url = "/korpa/RemoveProduct";
+
+                $.get(url, { productId: productId }, function (data) {
+                    location.reload();
+                });
+            });
+
+            //////////////////////////////////////////////////////////////
+
+            /*
+            * Porudzbina
+            */
+
+            $("a.placeorder").click(function (e) {
+                e.preventDefault();
+
+                var $this = $(this);
+
+                var url = "/korpa/PlaceOrder";
+
+                $(".ajaxbg").show();
+
+                $.post(url, {}, function (data) {
+                    $(".ajaxbg span").text("Thank you. You will now be redirected to paypal.");
+                    setTimeout(function () {
+                        $('form input[name="submit"]').click();
+                    }, 2000);
+                });
+            });
+
+            //////////////////////////////////////////////////////////////
+
+        });
+
+    </script>
+
+}

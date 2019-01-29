@@ -1,0 +1,101 @@
+﻿@model IEnumerable<ProdajaMeda.Models.ViewModels.Prodavnica.ProductVM>
+
+@{
+    ViewBag.Title = "Products";
+}
+
+@using PagedList.Mvc;
+@using PagedList
+
+<h2>Proizvodi</h2>
+<select id="SelektujKategoriju" name="SelektujKategoriju">
+    <option value="0">Sve</option>
+    @foreach (var item in ViewBag.Kategorije)
+    {
+        if (ViewBag.SelectedCat == item.Value)
+        {
+            <option selected="selected" value="@item.Value">@item.Text</option>
+        }
+        else
+        {
+            <option value="@item.Value">@item.Text</option>
+
+        }
+    }
+
+</select>
+<br /><br />
+
+<p>
+    @Html.ActionLink("Dodaj novi proizvod", "AddProduct")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            Naziv
+        </th>
+        <th>
+            Opis
+        </th>
+        <th>
+            Cena
+        </th>
+        <th>
+            Naziv Slike
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var product in ViewBag.OnePageOfProducts)
+    {
+        <tr>
+            <td>
+                @product.Name
+            </td>
+            <td>
+                @product.Description
+            </td>
+            <td>
+                @product.Price &nbsp;RSD
+            </td>
+            <td>
+                <a href="/Administrator/Prodavnica/EditProduct/@product.Id">
+                    <img src="/Images/Uploads/Products/@product.Id/Thumbs/@product.ImageName" />
+                </a>
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "EditProduct", new { id = product.Id }) |
+                @Html.ActionLink("Delete", "DeleteProduct", new { id = product.Id }, new { @class = "delete" })
+            </td>
+        </tr>
+    }
+
+</table>
+@Html.PagedListPager((IPagedList)ViewBag.OnePageOfProducts, page => Url.Action("Products", new { page, catId = ViewBag.SelectedCat }))
+
+
+@section Scripts{
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    <script>
+        $(function () {
+
+            // Selektovanje proizvoda specificiranje kategorije
+
+            $("#SelektujKategoriju").on("change", function () {
+                var url = $(this).val();
+
+                if (ur) {
+                    window.location = "/Administrator/Prodavnica/Products?catId=" + url;
+                }
+
+                return false;
+            });
+            //Potvrda brisanja proizvoda
+            $("a.delete").click(function () {
+                if (!confirm("Potvrdite brisanje proizvoda")) return false;
+            });
+        });
+
+    </script>
+
+}
